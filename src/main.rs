@@ -11,7 +11,7 @@ use hal::{
     dma::DmaPriority,
     gdma::Gdma,
     i2c::I2C,
-    i2s::{DataFormat, I2s, I2s0New, I2sWriteDma, MclkPin, PinsBclkWsDout, Standard},
+    i2s::{DataFormat, I2s, I2sWriteDma, Standard},
     peripherals::Peripherals,
     prelude::*,
     IO,
@@ -63,7 +63,6 @@ fn main() -> ! {
 
     let i2s = I2s::new(
         peripherals.I2S0,
-        MclkPin::new(io.pins.gpio2),
         Standard::Philips,
         DataFormat::Data16Channel16,
         44100u32.Hz(),
@@ -76,11 +75,12 @@ fn main() -> ! {
         &clocks,
     );
 
-    let i2s_tx = i2s.i2s_tx.with_pins(PinsBclkWsDout::new(
-        io.pins.gpio17,
-        io.pins.gpio47,
-        io.pins.gpio15,
-    ));
+    let i2s_tx = i2s
+        .i2s_tx
+        .with_bclk(io.pins.gpio17)
+        .with_ws(io.pins.gpio47)
+        .with_dout(io.pins.gpio15)
+        .build();
 
     let data =
         unsafe { core::slice::from_raw_parts(SAMPLE as *const _ as *const u8, SAMPLE.len()) };

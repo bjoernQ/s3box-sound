@@ -6,7 +6,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-hal = { package = "esp32s3-hal", version = "0.13.0", features = ["eh1"] }
-esp-backtrace = { version = "0.9.0", features = ["esp32s3", "panic-handler", "exception-handler", "print-uart"] }
-esp-println = { version = "0.7.0", features = ["esp32s3"] }
+hal = { package = "esp32s3-hal", version = "0.15.0", features = ["eh1"] }
+esp-backtrace = { version = "0.10.0", features = ["esp32s3", "panic-handler", "exception-handler", "print-uart"] }
+esp-println = { version = "0.8.0", features = ["esp32s3"] }
 es8311 = { git = "https://github.com/bjoernQ/es8311-rs", default-features = false }
