@@ -12,4 +12,4 @@ esp-println = { version = "0.9.0", features = ["esp32s3", "uart"] }
 es8311 = { git = "https://github.com/bjoernQ/es8311-rs", default-features = false }
 
 [patch.crates-io]
-esp32s3-hal = { git = "https://github.com/bjoernQ/esp-hal", rev = "fd5865ed310c5fa0cbcbdd327e168c8b03842abe", package = "esp32s3-hal" }
+esp32s3-hal = { git = "https://github.com/esp-rs/esp-hal", rev = "bc2f1a02cccd4cc0b16c1a47a2a13d049773243e", package = "esp32s3-hal" }

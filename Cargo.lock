@@ -305,7 +305,7 @@ dependencies = [
 [[package]]
 name = "esp-hal"
 version = "0.15.0"
-source = "git+https://github.com/bjoernQ/esp-hal?rev=fd5865ed310c5fa0cbcbdd327e168c8b03842abe#fd5865ed310c5fa0cbcbdd327e168c8b03842abe"
+source = "git+https://github.com/esp-rs/esp-hal?rev=bc2f1a02cccd4cc0b16c1a47a2a13d049773243e#bc2f1a02cccd4cc0b16c1a47a2a13d049773243e"
 dependencies = [
  "basic-toml",
  "bitfield",
@@ -340,7 +340,7 @@ dependencies = [
 [[package]]
 name = "esp-hal-procmacros"
 version = "0.8.0"
-source = "git+https://github.com/bjoernQ/esp-hal?rev=fd5865ed310c5fa0cbcbdd327e168c8b03842abe#fd5865ed310c5fa0cbcbdd327e168c8b03842abe"
+source = "git+https://github.com/esp-rs/esp-hal?rev=bc2f1a02cccd4cc0b16c1a47a2a13d049773243e#bc2f1a02cccd4cc0b16c1a47a2a13d049773243e"
 dependencies = [
  "darling",
  "document-features",
@@ -408,7 +408,7 @@ dependencies = [
 [[package]]
 name = "esp32s3-hal"
 version = "0.15.0"
-source = "git+https://github.com/bjoernQ/esp-hal?rev=fd5865ed310c5fa0cbcbdd327e168c8b03842abe#fd5865ed310c5fa0cbcbdd327e168c8b03842abe"
+source = "git+https://github.com/esp-rs/esp-hal?rev=bc2f1a02cccd4cc0b16c1a47a2a13d049773243e#bc2f1a02cccd4cc0b16c1a47a2a13d049773243e"
 dependencies = [
  "document-features",
  "esp-hal",
