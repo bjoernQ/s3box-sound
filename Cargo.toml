@@ -7,6 +7,9 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 hal = { package = "esp32s3-hal", version = "0.15.0", features = ["eh1"] }
-esp-backtrace = { version = "0.10.0", features = ["esp32s3", "panic-handler", "exception-handler", "print-uart"] }
-esp-println = { version = "0.8.0", features = ["esp32s3"] }
+esp-backtrace = { version = "0.11.0", features = ["esp32s3", "panic-handler", "exception-handler", "println"] }
+esp-println = { version = "0.9.0", features = ["esp32s3", "uart"] }
 es8311 = { git = "https://github.com/bjoernQ/es8311-rs", default-features = false }
+
+[patch.crates-io]
+esp32s3-hal = { git = "https://github.com/bjoernQ/esp-hal", rev = "fd5865ed310c5fa0cbcbdd327e168c8b03842abe", package = "esp32s3-hal" }

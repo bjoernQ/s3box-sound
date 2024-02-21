@@ -8,8 +8,8 @@ use esp_backtrace as _;
 use esp_println::println;
 use hal::{
     clock::ClockControl,
-    dma::DmaPriority,
-    gdma::Gdma,
+    dma::{Dma, DmaPriority},
+    dma_circular_buffers,
     i2c::I2C,
     i2s::{DataFormat, I2s, I2sWriteDma, Standard},
     peripherals::Peripherals,
@@ -53,13 +53,12 @@ fn main() -> ! {
     es8311.init(delay, &cfg).unwrap();
     println!("init done");
     es8311.voice_mute(false).unwrap();
-    es8311.set_voice_volume(180).unwrap();
+    es8311.set_voice_volume(160).unwrap();
 
-    let dma = Gdma::new(peripherals.DMA);
+    let dma = Dma::new(peripherals.DMA);
     let dma_channel = dma.channel0;
 
-    let mut tx_descriptors = [0u32; 20 * 3];
-    let mut rx_descriptors = [0u32; 8 * 3];
+    let (tx_buffer, mut tx_descriptors, _, mut rx_descriptors) = dma_circular_buffers!(128, 0);
 
     let i2s = I2s::new(
         peripherals.I2S0,
@@ -82,42 +81,27 @@ fn main() -> ! {
         .with_dout(io.pins.gpio15)
         .build();
 
-    let data =
-        unsafe { core::slice::from_raw_parts(SAMPLE as *const _ as *const u8, SAMPLE.len()) };
+    let data = SAMPLE;
 
-    let buffer = dma_buffer();
+    let buffer = tx_buffer;
     let mut idx = 0;
     for i in 0..usize::min(data.len(), buffer.len()) {
         buffer[i] = data[idx];
-
-        idx += 1;
-
-        if idx >= data.len() {
-            idx = 0;
-        }
+        idx = (idx + 1) % data.len();
     }
-
-    let mut filler = [0u8; 10000];
 
     let mut transfer = i2s_tx.write_dma_circular(buffer).unwrap();
     loop {
-        let avail = transfer.available();
-        if avail > 0 {
-            let avail = usize::min(10000, avail);
-            for bidx in 0..avail {
-                filler[bidx] = data[idx];
-                idx += 1;
-
-                if idx >= data.len() {
-                    idx = 0;
-                }
-            }
-            transfer.push(&filler[0..avail]).unwrap();
+        if transfer.available() > 0 {
+            transfer
+                .push_with(|dma_buf| {
+                    for i in 0..dma_buf.len() {
+                        dma_buf[i] = data[idx];
+                        idx = (idx + 1) % data.len();
+                    }
+                    dma_buf.len()
+                })
+                .unwrap();
         }
     }
-}
-
-fn dma_buffer() -> &'static mut [u8; 32000] {
-    static mut BUFFER: [u8; 32000] = [0u8; 32000];
-    unsafe { &mut BUFFER }
 }
