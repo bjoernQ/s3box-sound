@@ -6,21 +6,20 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-esp-hal = { package = "esp-hal", version = "0.18.0", features = [
+esp-hal = { package = "esp-hal", version = "0.19.0", features = [
     "embedded-hal",
     "esp32s3",
     "async",
 ] }
-esp-backtrace = { version = "0.12.0", features = [
+esp-backtrace = { version = "0.13.0", features = [
     "esp32s3",
     "panic-handler",
     "exception-handler",
     "println",
 ] }
-esp-println = { version = "0.9.1", features = ["esp32s3", "uart"] }
-esp-hal-embassy = { version = "0.1.0", features = [
+esp-println = { version = "0.10.0", features = ["esp32s3"] }
+esp-hal-embassy = { version = "0.2.0", features = [
     "esp32s3",
-    "time-systimer-16mhz",
 ] }
 
 es8311 = { git = "https://github.com/bjoernQ/es8311-rs", default-features = false }
@@ -32,3 +31,6 @@ embassy-executor = { version = "0.5.0", package = "embassy-executor", features =
 ] }
 embassy-time = { version = "0.3.0" }
 static_cell = { version = "2.0", features = ["nightly"] }
+
+[patch.crates-io]
+esp-hal = { path = "/projects/esp/esp-hal/esp-hal" }
