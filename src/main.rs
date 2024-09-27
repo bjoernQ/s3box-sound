@@ -56,7 +56,7 @@ async fn main(_spawner: Spawner) {
     let dma = Dma::new(peripherals.DMA);
     let dma_channel = dma.channel0;
 
-    let (tx_buffer, tx_descriptors, _, rx_descriptors) = dma_circular_buffers!(128, 0);
+    let (_,rx_descriptors, tx_buffer, tx_descriptors) = dma_circular_buffers!(0, 128);
 
     let i2s = I2s::new(
         peripherals.I2S0,
@@ -64,8 +64,8 @@ async fn main(_spawner: Spawner) {
         DataFormat::Data16Channel16,
         44100u32.Hz(),
         dma_channel.configure_for_async(false, DmaPriority::Priority0),
-        tx_descriptors,
         rx_descriptors,
+        tx_descriptors,
     );
 
     let i2s_tx = i2s
