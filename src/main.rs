@@ -9,25 +9,20 @@ use es8311::{Config, Resolution, SampleFreq};
 use esp_backtrace as _;
 use esp_hal::i2s::asynch::I2sWriteDmaAsync;
 use esp_hal::{
-    clock::ClockControl,
     dma::{Dma, DmaPriority},
     dma_circular_buffers,
     gpio::{Io, Level, Output},
     i2c::I2C,
     i2s::{DataFormat, I2s, Standard},
-    peripherals::Peripherals,
     prelude::*,
-    system::SystemControl,
 };
 use esp_println::println;
 
 const SAMPLE: &[u8] = include_bytes!("../sample.raw");
 
-#[main]
+#[esp_hal_embassy::main]
 async fn main(_spawner: Spawner) {
-    let peripherals = Peripherals::take();
-    let system = SystemControl::new(peripherals.SYSTEM);
-    let clocks = ClockControl::boot_defaults(system.clock_control).freeze();
+    let peripherals = esp_hal::init(esp_hal::Config::default());
 
     let io = Io::new(peripherals.GPIO, peripherals.IO_MUX);
 
@@ -39,8 +34,6 @@ async fn main(_spawner: Spawner) {
         io.pins.gpio8,
         io.pins.gpio18,
         100u32.kHz(),
-        &clocks,
-        None,
     );
 
     let mut es8311 = es8311::Es8311::new(i2c, es8311::Address::Primary);
@@ -54,7 +47,7 @@ async fn main(_spawner: Spawner) {
         sclk_inverted: true,
     };
 
-    let delay = esp_hal::delay::Delay::new(&clocks);
+    let delay = esp_hal::delay::Delay::new();
     es8311.init(delay, &cfg).unwrap();
     println!("init done");
     es8311.voice_mute(false).unwrap();
@@ -73,7 +66,6 @@ async fn main(_spawner: Spawner) {
         dma_channel.configure_for_async(false, DmaPriority::Priority0),
         tx_descriptors,
         rx_descriptors,
-        &clocks,
     );
 
     let i2s_tx = i2s
