@@ -7,13 +7,12 @@ use embassy_executor::Spawner;
 
 use es8311::{Config, Resolution, SampleFreq};
 use esp_backtrace as _;
-use esp_hal::i2s::asynch::I2sWriteDmaAsync;
 use esp_hal::{
     dma::{Dma, DmaPriority},
     dma_circular_buffers,
-    gpio::{Io, Level, Output},
-    i2c::I2C,
-    i2s::{DataFormat, I2s, Standard},
+    gpio::{Level, Output},
+    i2c::master::I2c,
+    i2s::master::{DataFormat, I2s, Standard},
     prelude::*,
 };
 use esp_println::println;
@@ -24,17 +23,18 @@ const SAMPLE: &[u8] = include_bytes!("../sample.raw");
 async fn main(_spawner: Spawner) {
     let peripherals = esp_hal::init(esp_hal::Config::default());
 
-    let io = Io::new(peripherals.GPIO, peripherals.IO_MUX);
-
-    let mut pa_ctrl = Output::new(io.pins.gpio46, Level::Low);
+    let mut pa_ctrl = Output::new(peripherals.GPIO46, Level::Low);
     pa_ctrl.set_high();
 
-    let i2c = I2C::new(
+    let i2c = I2c::new(
         peripherals.I2C0,
-        io.pins.gpio8,
-        io.pins.gpio18,
-        100u32.kHz(),
-    );
+        esp_hal::i2c::master::Config {
+            frequency: 100u32.kHz(),
+            ..esp_hal::i2c::master::Config::default()
+        },
+    )
+    .with_sda(peripherals.GPIO8)
+    .with_scl(peripherals.GPIO18);
 
     let mut es8311 = es8311::Es8311::new(i2c, es8311::Address::Primary);
 
@@ -56,23 +56,24 @@ async fn main(_spawner: Spawner) {
     let dma = Dma::new(peripherals.DMA);
     let dma_channel = dma.channel0;
 
-    let (_,rx_descriptors, tx_buffer, tx_descriptors) = dma_circular_buffers!(0, 128);
+    let (_, rx_descriptors, tx_buffer, tx_descriptors) = dma_circular_buffers!(0, 128);
 
     let i2s = I2s::new(
         peripherals.I2S0,
         Standard::Philips,
         DataFormat::Data16Channel16,
         44100u32.Hz(),
-        dma_channel.configure_for_async(false, DmaPriority::Priority0),
+        dma_channel.configure(false, DmaPriority::Priority0),
         rx_descriptors,
         tx_descriptors,
-    );
+    )
+    .into_async();
 
     let i2s_tx = i2s
         .i2s_tx
-        .with_bclk(io.pins.gpio17)
-        .with_ws(io.pins.gpio47)
-        .with_dout(io.pins.gpio15)
+        .with_bclk(peripherals.GPIO17)
+        .with_ws(peripherals.GPIO47)
+        .with_dout(peripherals.GPIO15)
         .build();
 
     let data = SAMPLE;
